@@ -93,8 +93,8 @@ def get_optimal_sequence(game_state, l=MAX_BUYS, generations=MAX_GENERATIONS):
         population = [x["value"] for x in elders]
         tot_score = sum(x["score"] for x in elders)
         for i in range(int(POP_SIZE * BREED_RATE)):
-            population.append(
-                breed(select_parent(elders, tot_score)["value"], select_parent(elders, tot_score)["value"]))
+            population.append(breed(select_parent(elders, tot_score)["value"],
+                                    select_parent(elders, tot_score)["value"]))
 
     return results[0]["value"]
 
