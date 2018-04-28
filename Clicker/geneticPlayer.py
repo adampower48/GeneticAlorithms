@@ -1,53 +1,65 @@
 # Finds the optimum starting buy order for idle clicker games
 # Current game parameters: Cookie Clicker - http://orteil.dashnet.org/cookieclicker/
 
+import copy
 import random
 
-import Clicker.game
+from clickerGame import Game
 
 MAX_GAME_TURNS = 1000
 MAX_BUYS = 30
 
 # GA Parameters
-POP_SIZE = 100
+POP_SIZE = 200
 MUTATE_RATE = 0.05
 BREED_RATE = 0.9
+MAX_GENERATIONS = 200
 
 # Constants calculated at program start instead of per func call
 MUTATE_RATE_BI = 0.5 * (1 + MUTATE_RATE)
 
 
-def gen_buy(_min=0, _max=len(Clicker.game.Game.building_cost)):
+def gen_buy(_min=0, _max=len(Game.building_cost)):
     return random.randrange(_min, _max)
 
 
-def gen_buy_order(n=MAX_BUYS):
-    return [gen_buy() for _ in range(n)]
+def gen_buy_order(l=MAX_BUYS, _min=0, _max=len(Game.building_cost)):
+    return [gen_buy(_min, _max) for _ in range(l)]
 
 
-def gen_pop(n=POP_SIZE):
-    return [gen_buy_order() for _ in range(n)]
+def gen_pop(n=POP_SIZE, _len=MAX_BUYS, _min=0, _max=len(Game.building_cost)):
+    return [gen_buy_order(_len, _min, _max) for _ in range(n)]
 
 
-def check_fitness(x):
-    # Simulates game and evaluates fitness with money per turn
+def simulate(game_state, max_turns, buy_order):
+    # Simulates game until out of buy instructions or given turns exceeded
+    game_state = copy.deepcopy(game_state)
+
+    order_ind = 0
+    while game_state.turns_taken < max_turns and order_ind < len(buy_order):
+        required_turns = game_state.turns_to_buy(buy_order[order_ind])
+        if required_turns <= 0:
+            game_state.buy_building(buy_order[order_ind])
+            order_ind += 1
+
+        game_state.advance_turn(min(required_turns, max_turns - game_state.turns_taken))
+
+    return game_state, order_ind
+
+
+def check_fitness(x, game_state=None):
+    # Evaluates fitness of given buy order based on money per turn
     r = {
         "value": x,
         "score": 0
     }
 
-    game = Clicker.game.Game()
+    if not game_state:
+        game_state = Game()
 
-    order_ind = 0
-    while game.turns_taken < MAX_GAME_TURNS and order_ind < len(x):
-        if game.buy_building(x[order_ind]):
-            order_ind += 1
+    game_state, order_ind = simulate(game_state, MAX_GAME_TURNS, x)
+    r["score"] = round(game_state.money_per_turn(), 1)
 
-        r["score"] += game.money_per_turn()
-
-        game.advance_turn()
-
-    r["score"] = round(r["score"], 1)
     return r
 
 
@@ -66,11 +78,32 @@ def select_parent(elders, tot_score):
             return e
 
 
-if __name__ == '__main__':
+def get_optimal_sequence(game_state, l=MAX_BUYS, generations=MAX_GENERATIONS):
+    # Attempts to find the optimal build order of given length starting from given game state
+    population = gen_pop(_len=l)
+    generation = 0
+
+    results = []
+    while generation < generations:
+        generation += 1
+        results = sorted(list(map(lambda x: check_fitness(x, game_state), population)),
+                         key=lambda x: x["score"], reverse=True)
+
+        elders = results[:int(POP_SIZE * (1 - BREED_RATE))]
+        population = [x["value"] for x in elders]
+        tot_score = sum(x["score"] for x in elders)
+        for i in range(int(POP_SIZE * BREED_RATE)):
+            population.append(
+                breed(select_parent(elders, tot_score)["value"], select_parent(elders, tot_score)["value"]))
+
+    return results[0]["value"]
+
+
+def main():
     population = gen_pop()
     generation = 0
 
-    while generation < 100:
+    while generation < MAX_GENERATIONS:
         generation += 1
         results = sorted(list(map(check_fitness, population)), key=lambda x: x["score"], reverse=True)
 
@@ -81,4 +114,10 @@ if __name__ == '__main__':
             population.append(
                 breed(select_parent(elders, tot_score)["value"], select_parent(elders, tot_score)["value"]))
 
-        print("Gen {}, score: {}: {}".format(generation, results[0]["score"], "".join(map(str, results[0]["value"]))))
+        print("Gen {}, score: {}: {}".format(generation, results[0]["score"], "-".join(map(str, results[0]["value"]))))
+
+
+if __name__ == '__main__':
+    # import cProfile
+    # cProfile.run("main()", sort="tottime")
+    main()
