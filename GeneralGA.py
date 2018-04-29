@@ -15,6 +15,7 @@ class GeneticAlgorithm:
         self.BREED_RATE = breed_rate
 
         # Constants calculated once here instead of per func call
+        # Note: If MUTATE_RATE is changed directly this will not update
         self.MUTATE_RATE_BI = 0.5 * (1 + self.MUTATE_RATE)
 
         # Misc
@@ -27,6 +28,7 @@ class GeneticAlgorithm:
         }
 
         # Project specific fitness here
+        # Must implement above dictionary
 
         return r
 
