@@ -6,7 +6,6 @@ class GeneticAlgorithm:
     Template for genetic algorithm.
     check_fitness, gen_genome, gen_bit must be overwritten
     run may need to be changed if check_fitness requires custom parameters
-
     """
 
     def __init__(self, pop_size=100, generations=100, mutate_rate=0.05, breed_rate=0.9, verbose=True):
