@@ -9,7 +9,7 @@ class GeneticAlgorithm:
 
     """
 
-    def __init__(self, pop_size=100, generations=100, mutate_rate=0.05, breed_rate=0.9):
+    def __init__(self, pop_size=100, generations=100, mutate_rate=0.05, breed_rate=0.9, verbose=True):
         self.POP_SIZE = pop_size
         self.GENERATIONS = generations
         self.MUTATE_RATE = mutate_rate
@@ -17,6 +17,9 @@ class GeneticAlgorithm:
 
         # Constants calculated once here instead of per func call
         self.MUTATE_RATE_BI = 0.5 * (1 + self.MUTATE_RATE)
+
+        # Misc
+        self.verbose = verbose
 
     def check_fitness(self, genome):
         r = {
@@ -45,6 +48,8 @@ class GeneticAlgorithm:
         pass
 
     def run(self):
+        # Attempts to find genome with highest fitness
+
         population = self.gen_pop(self.POP_SIZE)
         results = []
         generation = 0
@@ -62,6 +67,9 @@ class GeneticAlgorithm:
             for i in range(int(self.POP_SIZE * self.BREED_RATE)):
                 population.append(self.breed(self.select_parent(elders, tot_score)["value"],
                                              self.select_parent(elders, tot_score)["value"]))
+
+            if self.verbose and 10 * generation % self.GENERATIONS == 0:
+                print("Gen {}, Fit {}".format(generation, results[0]["score"]))
 
         return results[0]["value"]
 
