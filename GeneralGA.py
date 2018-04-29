@@ -63,11 +63,16 @@ class GeneticAlgorithm:
 
             elders = results[:int(self.POP_SIZE * (1 - self.BREED_RATE))]
             population = [x["value"] for x in elders]
-            tot_score = sum(x["score"] for x in elders)
+            # tot_score = sum(x["score"] for x in elders)  # Used for Proportional Selection
 
             for i in range(int(self.POP_SIZE * self.BREED_RATE)):
-                population.append(self.breed(self.select_parent(elders, tot_score)["value"],
-                                             self.select_parent(elders, tot_score)["value"]))
+                # Parent selection
+                # p1 = self.proportional_selection(elders, tot_score)["value"]
+                # p2 = self.proportional_selection(elders, tot_score)["value"]
+                p1 = self.tournament_selection(elders)["value"]
+                p2 = self.tournament_selection(elders)["value"]
+
+                population.append(self.breed(p1, p2))
 
             if self.verbose and 10 * generation % self.GENERATIONS == 0:
                 print("Gen {}, Fit {}".format(generation, results[0]["score"]))
@@ -75,10 +80,23 @@ class GeneticAlgorithm:
         return results[0]["value"]
 
     @staticmethod
-    def select_parent(elders, tot_score):
+    def proportional_selection(elders, tot_score):
+        # Proportional Selection
         selection = random.random() * tot_score
         _sum = 0
         for e in elders:
             _sum += e["score"]
             if selection <= _sum:
                 return e
+
+    @staticmethod
+    def tournament_selection(pop, k=2):
+        # Tournament Selection
+        # https://cstheory.stackexchange.com/questions/14758/tournament-selection-in-genetic-algorithms
+        best = None
+        for i in range(k):
+            ind = pop[random.randrange(len(pop))]
+            if not best or ind["score"] > best["score"]:
+                best = ind
+
+        return best
