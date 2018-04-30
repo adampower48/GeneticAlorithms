@@ -12,31 +12,40 @@ class Game:
 
     TERRAIN_SEG = 10  # Controls granularity of height map generated at start
 
-    def __init__(self):
-        self.terrain = [(0, 1500), (1000, 2000), (2000, 500), (3500, 500), (5000, 1500), (6999, 1000)]
-        self.landing_zone = (100, 150)
+    # Landing stuff
+    LAND_ANGLE = 0
+    LAND_VX = 20
+    LAND_VY = 40
 
-        self.ship_pos = (2500, 2700)
-        self.ship_fuel = 550
-        self.ship_velocity = (0, 0)
-        self.ship_angle = 0
-        self.ship_power = 0
+    def __init__(self, terrain=((0, 0),), ship_pos=(0, 0), ship_velocity=(0, 0), ship_angle=0, ship_power=0,
+                 ship_fuel=0):
+        self.terrain = terrain
+        self.ship_pos = ship_pos
+        self.ship_velocity = ship_velocity
+        self.ship_angle = ship_angle
+        self.ship_power = ship_power
+        self.ship_fuel = ship_fuel
 
         self.turns = 0
 
+        self.landing_zone = self.find_landing_zone()
         self.terrain_heights = {}
         self.calc_terrain_heights()
 
     def advance_turn(self):
         # Apply changes here
-        self.ship_velocity = (self.ship_velocity[0] + self.ship_power * -math.sin(math.radians(self.ship_angle)),
-                              self.ship_velocity[1] + self.ship_power * math.cos(
-                                  math.radians(self.ship_angle)) + self.GRAVITY)
+        vx_old = self.ship_velocity[0]
+        vy_old = self.ship_velocity[1]
+        vx = self.ship_velocity[0] + self.ship_power * -math.sin(math.radians(self.ship_angle))
+        vy = self.ship_velocity[1] + self.ship_power * math.cos(math.radians(self.ship_angle)) + self.GRAVITY
+        self.ship_velocity = (vx, vy)
 
         # Update info
         self.ship_fuel -= self.ship_power
-        self.ship_pos = (self.ship_pos[0] + self.ship_velocity[0],
-                         self.ship_pos[1] + self.ship_velocity[1])
+        self.ship_pos = (self.ship_pos[0] + (vx + vx_old) / 2,
+                         self.ship_pos[1] + (vy + vy_old) / 2)
+
+        # self.ship_pos = tuple(map(round, self.ship_pos))
 
         self.turns += 1
 
@@ -65,16 +74,41 @@ class Game:
         for i in range(len(self.terrain) - 1):
             l, r = self.terrain[i], self.terrain[i + 1]
 
-            for x in range(l[0] // self.TERRAIN_SEG, r[0], self.TERRAIN_SEG):
+            for x in range((l[0] // self.TERRAIN_SEG) * self.TERRAIN_SEG, r[0], self.TERRAIN_SEG):
                 self.terrain_heights[x] = l[1] + ((r[1] - l[1]) / (r[0] - l[0])) * (x - l[0])
 
+    def get_terrain_height(self, x):
+        return self.terrain_heights.get(int(x - x % self.TERRAIN_SEG), 100000)
+
     def crashed(self):
-        return self.ship_pos[1] <= self.terrain_heights.get(self.ship_pos[0] - self.ship_pos[0] % self.TERRAIN_SEG,
-                                                            100000)
+        return self.ship_pos[1] <= self.get_terrain_height(self.ship_pos[0])
+
+    def distance_to_landing_zone(self):
+        land_x = sum(self.landing_zone) / 2
+        land_y = self.get_terrain_height(land_x)
+
+        if self.landing_zone[0] < self.ship_pos[0] < self.landing_zone[1]:
+            return abs(self.ship_pos[1] - land_y)
+
+        closest_land_x = min(self.landing_zone, key=lambda x: abs(self.ship_pos[0] - x))
+        return math.hypot(closest_land_x - self.ship_pos[0], land_y - self.ship_pos[1])
+
+    def distance_to_safe_velocity(self):
+        x = max(0, abs(self.ship_velocity[0]) - self.LAND_VX)
+        y = max(0, abs(self.ship_velocity[1]) - self.LAND_VY)
+        return math.hypot(x, y)
+
+    def is_upright(self):
+        return self.ship_angle == 0
 
     def __str__(self):
-        return "x {}, y {}, angle {}, power {}, fuel {}".format(
-            *self.ship_pos, self.ship_angle, self.ship_power, self.ship_fuel)
+        return "x {}, y {}, vx {}, vy {}, fuel {}, angle {}, power {}".format(
+            *self.ship_pos, *self.ship_velocity, self.ship_fuel, self.ship_angle, self.ship_power)
+
+    def find_landing_zone(self):
+        for i in range(len(self.terrain) - 1):
+            if self.terrain[i][1] == self.terrain[i + 1][1]:
+                return self.terrain[i][0], self.terrain[i + 1][0]
 
 
 if __name__ == '__main__':

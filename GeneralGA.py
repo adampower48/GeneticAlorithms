@@ -8,7 +8,8 @@ class GeneticAlgorithm:
     run may need to be changed if check_fitness requires custom parameters
     """
 
-    def __init__(self, pop_size=100, generations=100, mutate_rate=0.05, breed_rate=0.9, verbose=True):
+    def __init__(self, pop_size=100, generations=100, mutate_rate=0.05, breed_rate=0.9, verbose=True,
+                 verbose_interval=10, **kwargs):
         self.POP_SIZE = pop_size
         self.GENERATIONS = generations
         self.MUTATE_RATE = mutate_rate
@@ -20,6 +21,10 @@ class GeneticAlgorithm:
 
         # Misc
         self.verbose = verbose
+        self.verbose_interval = verbose_interval
+
+        for k, v in kwargs.items():
+            setattr(self, k, v)
 
     def check_fitness(self, genome):
         r = {
@@ -74,7 +79,7 @@ class GeneticAlgorithm:
 
                 population.append(self.breed(p1, p2))
 
-            if self.verbose and 10 * generation % self.GENERATIONS == 0:
+            if self.verbose and generation % self.verbose_interval == 0:
                 print("Gen {}, Fit {}".format(generation, results[0]["score"]))
 
         return results[0]["value"]
