@@ -11,6 +11,7 @@ class LanderGA(GeneticAlgorithm):
     MIN_POWER = 3
     MAX_POWER = 4
 
+    # Finite number of user instructions to reduce search space
     possible_actions = (
         (-22, 4), (22, 4),
         (0, 3), (0, 4),
@@ -39,18 +40,21 @@ class LanderGA(GeneticAlgorithm):
         return [self.gen_bit() for _ in range(self.genome_length)]
 
     def check_fitness(self, genome):
-        # Evaluates fitness of given instructions based on height
+        # Evaluates fitness of given instructions
         r = {
             "value": genome,
             "score": 0
         }
 
         end_state = simulate(self.game_state, self.max_turns, genome)
+
+        # Possible scoring criteria
         # r["score"] = end_state.ship_pos[1]  # Height
         # r["score"] = end_state.turns  # Number of turns survived
         # r["score"] = - end_state.distance_to_landing_zone()  # Distance to landing zone
         # r["score"] = -end_state.distance_to_safe_velocity()  # How far off safe velocity
         # r["score"] = - int(not end_state.is_upright())  # Is ship upright
+
         r["score"] = - end_state.distance_to_landing_zone() - end_state.distance_to_safe_velocity() - int(
             not end_state.is_upright())
 
@@ -58,6 +62,7 @@ class LanderGA(GeneticAlgorithm):
 
 
 def simulate(game_state, max_turns, genome, verbose=False):
+    # Plays game with given instruictions
     game_state = copy.deepcopy(game_state)
 
     genome_ind = 0

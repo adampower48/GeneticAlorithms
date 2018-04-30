@@ -1,3 +1,6 @@
+# Modelling Codingame's Mars Lander puzzle
+# https://www.codingame.com/ide/puzzle/mars-lander-episode-2
+
 import math
 
 
@@ -33,16 +36,15 @@ class Game:
         self.calc_terrain_heights()
 
     def advance_turn(self):
-        # Apply changes here
-        vx_old = self.ship_velocity[0]
-        vy_old = self.ship_velocity[1]
+        # Velocity calculations
+        vx_old, vy_old = self.ship_velocity[0]
         vx = self.ship_velocity[0] + self.ship_power * -math.sin(math.radians(self.ship_angle))
         vy = self.ship_velocity[1] + self.ship_power * math.cos(math.radians(self.ship_angle)) + self.GRAVITY
         self.ship_velocity = (vx, vy)
 
         # Update info
         self.ship_fuel -= self.ship_power
-        self.ship_pos = (self.ship_pos[0] + (vx + vx_old) / 2,
+        self.ship_pos = (self.ship_pos[0] + (vx + vx_old) / 2,  # (vx + vx_old) / 2 from eulerscheZahl from CG forum
                          self.ship_pos[1] + (vy + vy_old) / 2)
 
         # self.ship_pos = tuple(map(round, self.ship_pos))
@@ -50,6 +52,7 @@ class Game:
         self.turns += 1
 
     def apply_order(self, angle, power):
+        # Applies changes given by user
         if power > self.ship_power:
             self.ship_power += 1
         elif power < self.ship_power:
@@ -71,6 +74,7 @@ class Game:
         return False
 
     def calc_terrain_heights(self):
+        # Generates heightmap from initial height points
         for i in range(len(self.terrain) - 1):
             l, r = self.terrain[i], self.terrain[i + 1]
 
@@ -101,14 +105,15 @@ class Game:
     def is_upright(self):
         return self.ship_angle == 0
 
-    def __str__(self):
-        return "x {}, y {}, vx {}, vy {}, fuel {}, angle {}, power {}".format(
-            *self.ship_pos, *self.ship_velocity, self.ship_fuel, self.ship_angle, self.ship_power)
-
     def find_landing_zone(self):
+        # Gets landing left & right x values from terrain
         for i in range(len(self.terrain) - 1):
             if self.terrain[i][1] == self.terrain[i + 1][1]:
                 return self.terrain[i][0], self.terrain[i + 1][0]
+
+    def __str__(self):
+        return "x {}, y {}, vx {}, vy {}, fuel {}, angle {}, power {}".format(
+            *self.ship_pos, *self.ship_velocity, self.ship_fuel, self.ship_angle, self.ship_power)
 
 
 if __name__ == '__main__':
