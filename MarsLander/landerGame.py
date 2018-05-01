@@ -37,7 +37,7 @@ class Game:
 
     def advance_turn(self):
         # Velocity calculations
-        vx_old, vy_old = self.ship_velocity[0]
+        vx_old, vy_old = self.ship_velocity
         vx = self.ship_velocity[0] + self.ship_power * -math.sin(math.radians(self.ship_angle))
         vy = self.ship_velocity[1] + self.ship_power * math.cos(math.radians(self.ship_angle)) + self.GRAVITY
         self.ship_velocity = (vx, vy)
@@ -110,6 +110,9 @@ class Game:
         for i in range(len(self.terrain) - 1):
             if self.terrain[i][1] == self.terrain[i + 1][1]:
                 return self.terrain[i][0], self.terrain[i + 1][0]
+
+    def get_input_str(self):
+        return " ".join([*self.ship_pos, *self.ship_velocity, self.ship_fuel, self.ship_angle, self.ship_power])
 
     def __str__(self):
         return "x {}, y {}, vx {}, vy {}, fuel {}, angle {}, power {}".format(

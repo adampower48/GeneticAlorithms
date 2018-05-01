@@ -1,4 +1,5 @@
 import random
+import time
 
 
 class GeneticAlgorithm:
@@ -8,12 +9,15 @@ class GeneticAlgorithm:
     run may need to be changed if check_fitness requires custom parameters
     """
 
+    DEFAULT_MAX_TIME = 1000000
+
     def __init__(self, pop_size=100, generations=100, mutate_rate=0.05, breed_rate=0.9, verbose=True,
-                 verbose_interval=10, **kwargs):
+                 verbose_interval=10, max_time=0, **kwargs):
         self.POP_SIZE = pop_size
         self.GENERATIONS = generations
         self.MUTATE_RATE = mutate_rate
         self.BREED_RATE = breed_rate
+        self.MAX_TIME = max_time if max_time else self.DEFAULT_MAX_TIME
 
         # Constants calculated once here instead of per func call
         # Note: If MUTATE_RATE is changed directly this will not update
@@ -55,18 +59,19 @@ class GeneticAlgorithm:
 
     def run(self):
         # Attempts to find genome with highest fitness
+        time_start = time_ms()
 
         population = self.gen_pop(self.POP_SIZE)
         results = []
         generation = 0
 
-        while generation < self.GENERATIONS:
+        while generation < self.GENERATIONS and time_ms() - time_start < self.MAX_TIME:
             generation += 1
             # This lambda may need to be changed depending on your fitness function
             results = sorted(list(map(lambda g: self.check_fitness(g), population)),
                              key=lambda g: g["score"], reverse=True)
 
-            elders = results[:int(self.POP_SIZE * (1 - self.BREED_RATE))]
+            elders = results[:int(self.POP_SIZE * (1 - self.BREED_RATE)) + 1]
             population = [x["value"] for x in elders]
             # tot_score = sum(x["score"] for x in elders)  # Used for Proportional Selection
 
@@ -105,3 +110,7 @@ class GeneticAlgorithm:
                 best = ind
 
         return best
+
+
+def time_ms():
+    return time.time() * 1000

@@ -19,9 +19,9 @@ class LanderGA(GeneticAlgorithm):
     )
 
     def __init__(self, pop_size=100, generations=100, mutate_rate=0.02, breed_rate=0.95, genome_length=400,
-                 max_turns=400, start_state=None, verbose_interval=10, **kwargs):
+                 max_turns=400, max_time=0, start_state=None, verbose_interval=10, **kwargs):
         super().__init__(pop_size=pop_size, generations=generations, mutate_rate=mutate_rate, breed_rate=breed_rate,
-                         verbose_interval=verbose_interval, **kwargs)
+                         max_time=max_time, verbose_interval=verbose_interval, **kwargs)
 
         self.genome_length = genome_length
         self.max_turns = max_turns
@@ -37,7 +37,7 @@ class LanderGA(GeneticAlgorithm):
         return random.choice(self.possible_actions)
 
     def gen_genome(self):
-        return [self.gen_bit() for _ in range(self.genome_length)]
+        return [self.gen_bit() for _ in range(self.genome_length - self.game_state.turns + 1)]
 
     def check_fitness(self, genome):
         # Evaluates fitness of given instructions
@@ -140,7 +140,7 @@ if __name__ == '__main__':
         ship_power=0
     )
 
-    lga = LanderGA(start_state=game, generations=50, verbose_interval=5)
+    lga = LanderGA(start_state=game, pop_size=10, breed_rate=0.7, verbose_interval=1, max_time=80, verbose=False)
     best_orders = lga.run()
-    simulate(game, 1000, best_orders, True)
-    print(*list(zip(*best_orders)), sep="\n")
+    simulate(game, 1000, best_orders, False)
+    print(*best_orders)
