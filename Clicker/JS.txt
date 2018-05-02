@@ -1,0 +1,7 @@
+Useful JS functions from cookie clicker site
+============================================
+Game.Objects    ->  Array of all the buildings & their info
+Game.Objects["Cursor"].buy(x)   -> Buys x amount of Cursors
+Game.Objects["Cursor"].sell(x)  -> Sells x amount of Cursors
+Game.Objects["Cursor"].getPrice()  -> Gets current price of Cursor
+Game.cookies    -> Float of current amount of cookies

@@ -6,8 +6,8 @@ from MarsLander.landerGame import Game
 
 
 class LanderGA(GeneticAlgorithm):
-    MIN_ANGLE = -25
-    MAX_ANGLE = 25
+    MIN_ANGLE = -45
+    MAX_ANGLE = 45
     MIN_POWER = 3
     MAX_POWER = 4
 
