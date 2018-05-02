@@ -54,16 +54,17 @@ class LanderGA(GeneticAlgorithm):
         # r["score"] = - end_state.distance_to_landing_zone()  # Distance to landing zone
         # r["score"] = -end_state.distance_to_safe_velocity()  # How far off safe velocity
         # r["score"] = - int(not end_state.is_upright())  # Is ship upright
+        # r["score"] = - (1 - end_state.ship_fuel / self.game_state.ship_fuel)  # Remaining fuel
 
         r["score"] = - end_state.distance_to_landing_zone() - end_state.distance_to_safe_velocity() - int(
-            not end_state.is_upright())
+            not end_state.is_upright()) - (1 - end_state.ship_fuel / self.game_state.ship_fuel)
 
         return r
 
 
 def simulate(game_state, max_turns, genome, verbose=False):
     # Plays game with given instruictions
-    game_state = copy.deepcopy(game_state)
+    game_state = copy.copy(game_state)
 
     genome_ind = 0
     while genome_ind < len(genome) and not game_state.game_stopped() and game_state.turns < max_turns:

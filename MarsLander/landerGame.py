@@ -92,7 +92,13 @@ class Game:
         land_y = self.get_terrain_height(land_x)
 
         if self.landing_zone[0] < self.ship_pos[0] < self.landing_zone[1]:
-            return abs(self.ship_pos[1] - land_y)
+            d = self.ship_pos[1] - land_y
+
+            if -1 <= d <= 0:
+                # Fitness is never 0 even with a successful landing
+                return 0
+            else:
+                return abs(d)
 
         closest_land_x = min(self.landing_zone, key=lambda x: abs(self.ship_pos[0] - x))
         return math.hypot(closest_land_x - self.ship_pos[0], land_y - self.ship_pos[1])
