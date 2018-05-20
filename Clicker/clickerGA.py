@@ -4,8 +4,7 @@
 import copy
 import random
 
-from clickerGame import Game
-
+from Clicker.clickerGame import Game
 from GeneralGA import GeneticAlgorithm
 
 
@@ -27,7 +26,21 @@ class ClickerGA(GeneticAlgorithm):
             setattr(self, k, v)
 
     def gen_bit(self):
-        return random.randrange(len(Game.building_cost))
+        # Only buying buildings allowed
+        # return random.randrange(len(Game.building_cost))
+
+        # Buying buildinds/upgrades allowed
+        # 0: buy building
+        # 1: buy upgrade
+        action = random.randrange(0, 2)
+        if action == 0:
+            bInd = random.randrange(len(Game.building_cost))
+            return action, bInd
+
+        if action == 1:
+            bInd = random.randrange(len(Game.building_cost))
+            upInd = random.randrange(len(Game.upgrade_cost[0]))
+            return action, bInd, upInd
 
     def gen_genome(self):
         return [self.gen_bit() for _ in range(self.genome_length)]
@@ -45,31 +58,55 @@ class ClickerGA(GeneticAlgorithm):
         return r
 
 
-def simulate(game_state, max_turns, buy_order):
+def simulate(game_state, max_turns, actions, graph=False):
     # Simulates game until out of buy instructions or given turns exceeded
+    def calc_req_turns(action_ind):
+        if actions[action_ind][0] == 0:
+            return game_state.turns_to_buy_building(actions[action_ind][1])
+        elif actions[action_ind][0] == 1:
+            return game_state.turns_to_buy_upgrade(actions[action_ind][1], actions[action_ind][2])
+        else:
+            return 0
+
+    def perform_action(action_ind):
+        if actions[action_ind][0] == 0:
+            game_state.buy_building(actions[action_ind][1])
+        elif actions[action_ind][0] == 1:
+            game_state.buy_upgrade(actions[action_ind][1], actions[action_ind][2])
+
     game_state = copy.copy(game_state)
 
-    order_ind = 0
-    required_turns = game_state.turns_to_buy(buy_order[order_ind])
-    while required_turns < max_turns - game_state.turns_taken and order_ind < len(buy_order):
+    if graph:
+        plot_points = []
+
+    action_ind = 0
+    required_turns = calc_req_turns(action_ind)
+    while required_turns < max_turns - game_state.turns_taken and action_ind < len(actions):
         if required_turns <= 0:
-            game_state.buy_building(buy_order[order_ind])
-            order_ind += 1
-            if order_ind < len(buy_order):
-                required_turns = game_state.turns_to_buy(buy_order[order_ind])
+            perform_action(action_ind)
+
+            action_ind += 1
+            if action_ind < len(actions):
+                required_turns = calc_req_turns(action_ind)
+
+            if graph:
+                plot_points.append((game_state.turns_taken, game_state.money_per_turn))
 
         turns_to_take = min(required_turns, max_turns - game_state.turns_taken)
         game_state.advance_turn(turns_to_take)
         required_turns -= turns_to_take
 
-    return game_state, order_ind
+    if graph:
+        print("Plot points:", plot_points)
+
+    return game_state, action_ind
 
 
 def main():
-    cga = ClickerGA(max_turns=1800, genome_length=50, pop_size=200, generations=1000, mutate_rate=0.1, breed_rate=0.75,
-                    max_time=10000)
+    cga = ClickerGA(max_turns=3600, genome_length=200, pop_size=200, generations=1000, mutate_rate=0.1, breed_rate=0.75,
+                    max_time=30000)
     best_buys = cga.run()
-    end_state, nbuys = simulate(Game(), 5000, best_buys)
+    end_state, nbuys = simulate(Game(), 3600, best_buys, graph=True)
     print("MPT: {}, Buys: {}".format(end_state.money_per_turn, nbuys))
     print("Genome:", best_buys[:nbuys])
 
