@@ -1,6 +1,8 @@
 import random
 import time
 
+import numpy
+
 
 class GeneticAlgorithm:
     """
@@ -42,9 +44,25 @@ class GeneticAlgorithm:
         return r
 
     def breed(self, p1, p2):
-        rands = [random.random() for _ in range(len(p1))]
-        return [self.gen_bit() if r < self.MUTATE_RATE else (p1[i] if r < self.MUTATE_RATE_BI else p2[i]) for (i, r) in
-                enumerate(rands)]
+        # Fully random chance per bit to mutate
+        # rands = [random.random() for _ in range(len(p1))]
+        # return [self.gen_bit() if r < self.MUTATE_RATE else (p1[i] if r < self.MUTATE_RATE_BI else p2[i]) for (i, r) in
+        #         enumerate(rands)]
+
+        # One point crossover
+        xpos = random.randrange(len(p1))
+        if random.random() < 0.5:
+            child = p1[:xpos] + p2[xpos:]
+        else:
+            child = p2[:xpos] + p1[xpos:]
+
+        # Randomly choose bits to mutate
+        n_mutates = numpy.random.poisson(self.MUTATE_RATE * len(child))
+        places = numpy.random.randint(len(child), size=n_mutates).tolist()
+        for p in places:
+            child[p] = self.gen_bit()
+
+        return child
 
     def gen_pop(self, n):
         return [self.gen_genome() for _ in range(n)]

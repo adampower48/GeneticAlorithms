@@ -2,13 +2,18 @@
 # Current game parameters: Cookie Clicker - http://orteil.dashnet.org/cookieclicker/
 
 import copy
-import random
 
-from Clicker.clickerGame import Game
+from clickerGame import Game
+
+import MyRandom
 from GeneralGA import GeneticAlgorithm
 
 
 class ClickerGA(GeneticAlgorithm):
+    rand_action = MyRandom.Randrange(2)
+    rand_building = MyRandom.Randrange(len(Game.building_cost_base))
+    rand_upgrade = MyRandom.Randrange(len(Game.upgrade_cost[0]))
+
     def __init__(self, pop_size=100, generations=100, mutate_rate=0.02, breed_rate=0.95, genome_length=400,
                  max_turns=400, max_time=0, start_state=None, verbose_interval=10, **kwargs):
         super().__init__(pop_size=pop_size, generations=generations, mutate_rate=mutate_rate, breed_rate=breed_rate,
@@ -32,14 +37,14 @@ class ClickerGA(GeneticAlgorithm):
         # Buying buildinds/upgrades allowed
         # 0: buy building
         # 1: buy upgrade
-        action = random.randrange(0, 2)
+        action = self.rand_action.next()
         if action == 0:
-            bInd = random.randrange(len(Game.building_cost))
+            bInd = self.rand_building.next()
             return action, bInd
 
         if action == 1:
-            bInd = random.randrange(len(Game.building_cost))
-            upInd = random.randrange(len(Game.upgrade_cost[0]))
+            bInd = self.rand_building.next()
+            upInd = self.rand_upgrade.next()
             return action, bInd, upInd
 
     def gen_genome(self):
@@ -103,8 +108,8 @@ def simulate(game_state, max_turns, actions, graph=False):
 
 
 def main():
-    cga = ClickerGA(max_turns=3600, genome_length=200, pop_size=200, generations=1000, mutate_rate=0.1, breed_rate=0.75,
-                    max_time=30000)
+    cga = ClickerGA(max_turns=900, genome_length=200, pop_size=200, generations=1000, mutate_rate=0.1, breed_rate=0.75,
+                    max_time=10000)
     best_buys = cga.run()
     end_state, nbuys = simulate(Game(), 3600, best_buys, graph=True)
     print("MPT: {}, Buys: {}".format(end_state.money_per_turn, nbuys))
@@ -112,5 +117,7 @@ def main():
 
 
 if __name__ == '__main__':
-    # cProfile.run("main()", sort="tottime")
-    main()
+    import cProfile
+
+    cProfile.run("main()", sort="tottime")
+    # main()
