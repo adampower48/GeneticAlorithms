@@ -1,7 +1,8 @@
 # Finds the optimum starting buy order for idle clicker games
-# Current game parameters: Cookie Clicker - http://orteil.dashnet.org/cookieclicker/
+# Current game: Cookie Clicker - http://orteil.dashnet.org/cookieclicker/
 
-import copy
+
+import random
 
 from clickerGame import Game
 
@@ -44,7 +45,11 @@ class ClickerGA(GeneticAlgorithm):
 
         if action == 1:
             bInd = self.rand_building.next()
-            upInd = self.rand_upgrade.next()
+            if bInd == 0:
+                # Cursor upgrades scale differently, must be implemented later
+                upInd = random.randrange(2)
+            else:
+                upInd = self.rand_upgrade.next()
             return action, bInd, upInd
 
     def gen_genome(self):
@@ -59,6 +64,7 @@ class ClickerGA(GeneticAlgorithm):
 
         game_state, order_ind = simulate(self.game_state, self.max_turns, genome)
         r["score"] = game_state.get_total_money_earned()
+        # r["score"] = game_state.money_per_turn
 
         return r
 
@@ -79,7 +85,7 @@ def simulate(game_state, max_turns, actions, graph=False):
         elif actions[action_ind][0] == 1:
             game_state.buy_upgrade(actions[action_ind][1], actions[action_ind][2])
 
-    game_state = copy.copy(game_state)
+    game_state = game_state.copy()
 
     if graph:
         plot_points = []
@@ -108,16 +114,16 @@ def simulate(game_state, max_turns, actions, graph=False):
 
 
 def main():
-    cga = ClickerGA(max_turns=900, genome_length=200, pop_size=200, generations=1000, mutate_rate=0.1, breed_rate=0.75,
-                    max_time=10000)
+    cga = ClickerGA(max_turns=7200, genome_length=200, pop_size=200, generations=10000, mutate_rate=0.1,
+                    breed_rate=0.75,
+                    max_time=0)
     best_buys = cga.run()
-    end_state, nbuys = simulate(Game(), 3600, best_buys, graph=True)
+    end_state, nbuys = simulate(Game(), 7200, best_buys, graph=True)
     print("MPT: {}, Buys: {}".format(end_state.money_per_turn, nbuys))
     print("Genome:", best_buys[:nbuys])
 
 
 if __name__ == '__main__':
-    import cProfile
-
-    cProfile.run("main()", sort="tottime")
-    # main()
+    # import cProfile
+    # cProfile.run("main()", sort="tottime")
+    main()
