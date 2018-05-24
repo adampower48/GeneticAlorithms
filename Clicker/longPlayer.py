@@ -2,17 +2,16 @@ from clickerGame import Game
 
 import Clicker.clickerGA as clickerGA
 
-MAX_GAME_TURNS = 1800
-SUBSEC_TURNS = 360
-SUBSEC_BUYS = 100
-SUBSEC_GENS = 200
-SUBSEC_MAX_TIME = 15000 * SUBSEC_TURNS / MAX_GAME_TURNS
+MAX_GAME_TURNS = 7200
+SUBSEC_TURNS = 1200
+SUBSEC_BUYS = 75
+SUBSEC_GENS = 200000
+SUBSEC_MAX_TIME = 10000 * SUBSEC_TURNS / MAX_GAME_TURNS
 
 
 def main():
-    cga = clickerGA.ClickerGA(max_turns=SUBSEC_TURNS, genome_length=SUBSEC_BUYS, pop_size=200,
-                              generations=SUBSEC_GENS, mutate_rate=0.01, breed_rate=0.75, verbose=True,
-                              max_time=SUBSEC_MAX_TIME)
+    cga = clickerGA.ClickerGA(max_turns=SUBSEC_TURNS, genome_length=SUBSEC_BUYS, generations=SUBSEC_GENS,
+                              max_time=SUBSEC_MAX_TIME, verbose=True, verbose_interval=50)
     game = Game()
 
     optimal_order = []
@@ -30,7 +29,7 @@ def main():
         turns += end_state.turns_taken
 
     print("Optimal buys:", optimal_order)
-    print(*clickerGA.simulate(Game(), MAX_GAME_TURNS, optimal_order))
+    print(*clickerGA.simulate(Game(), MAX_GAME_TURNS, optimal_order, graph=True))
 
 
 if __name__ == '__main__':

@@ -15,8 +15,8 @@ class ClickerGA(GeneticAlgorithm):
     rand_building = MyRandom.Randrange(len(Game.building_cost_base))
     rand_upgrade = MyRandom.Randrange(len(Game.upgrade_cost[0]))
 
-    def __init__(self, pop_size=100, generations=100, mutate_rate=0.02, breed_rate=0.95, genome_length=400,
-                 max_turns=400, max_time=0, start_state=None, verbose_interval=10, **kwargs):
+    def __init__(self, pop_size=50, generations=100, mutate_rate=0.1, breed_rate=0.75, genome_length=100,
+                 max_turns=3600, max_time=0, start_state=None, verbose_interval=10, **kwargs):
         super().__init__(pop_size=pop_size, generations=generations, mutate_rate=mutate_rate, breed_rate=breed_rate,
                          max_time=max_time, verbose_interval=verbose_interval, **kwargs)
 
@@ -114,7 +114,7 @@ def simulate(game_state, max_turns, actions, graph=False):
 
 
 def main():
-    cga = ClickerGA(max_turns=7200, genome_length=200, pop_size=200, generations=10000, mutate_rate=0.1,
+    cga = ClickerGA(max_turns=7200, genome_length=100, pop_size=50, generations=1000, mutate_rate=0.1,
                     breed_rate=0.75,
                     max_time=0)
     best_buys = cga.run()

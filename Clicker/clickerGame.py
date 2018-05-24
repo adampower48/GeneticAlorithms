@@ -151,6 +151,9 @@ class Game:
         :param upInd: Index of upgrade
         :return: int - number of turns
         """
+        if self.upgrades_owned[bInd][upInd]:
+            return 1000000
+
         cost = self.get_upgrade_cost(bInd, upInd)
         if self.money >= cost:
             return 0
