@@ -1,12 +1,11 @@
+import clickerGA as clickerGA
 from clickerGame import Game
-
-import Clicker.clickerGA as clickerGA
 
 MAX_GAME_TURNS = 7200
 SUBSEC_TURNS = 1200
 SUBSEC_BUYS = 75
 SUBSEC_GENS = 200000
-SUBSEC_MAX_TIME = 10000 * SUBSEC_TURNS / MAX_GAME_TURNS
+SUBSEC_MAX_TIME = 600000 * SUBSEC_TURNS / MAX_GAME_TURNS
 
 
 def main():
@@ -29,8 +28,12 @@ def main():
         turns += end_state.turns_taken
 
     print("Optimal buys:", optimal_order)
-    print(*clickerGA.simulate(Game(), MAX_GAME_TURNS, optimal_order, graph=True))
+    g, _ = clickerGA.simulate(Game(), MAX_GAME_TURNS, optimal_order, graph=True)
+    print(g)
 
 
 if __name__ == '__main__':
+    # import cProfile
+    #
+    # cProfile.run("main()", sort="tottime")
     main()

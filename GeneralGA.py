@@ -91,7 +91,7 @@ class GeneticAlgorithm:
 
             elders = results[:int(self.POP_SIZE * (1 - self.BREED_RATE)) + 1]
             population = [x["value"] for x in elders]
-            # tot_score = sum(x["score"] for x in elders)  # Used for Proportional Selection
+            # tot_score = sum([x["score"] for x in elders])  # Used for Proportional Selection
 
             for i in range(int(self.POP_SIZE * self.BREED_RATE)):
                 # Parent selection

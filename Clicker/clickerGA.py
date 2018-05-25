@@ -2,8 +2,6 @@
 # Current game: Cookie Clicker - http://orteil.dashnet.org/cookieclicker/
 
 
-import random
-
 from clickerGame import Game
 
 import MyRandom
@@ -11,9 +9,12 @@ from GeneralGA import GeneticAlgorithm
 
 
 class ClickerGA(GeneticAlgorithm):
-    rand_action = MyRandom.Randrange(2)
+    rand_action = MyRandom.Randrange(3)
     rand_building = MyRandom.Randrange(len(Game.building_cost_base))
-    rand_upgrade = MyRandom.Randrange(len(Game.upgrade_cost[0]))
+    rand_upgrade = MyRandom.Randrange(16)
+    rand_building_upgrade = MyRandom.Randrange(len(Game.upgrade_cost[1]))
+    rand_cursor_upgrade = MyRandom.Randrange(len(Game.upgrade_cost[0]))
+    rand_grandma_upgrade = MyRandom.Randrange(len(Game.building_cost_base) - 2)
 
     def __init__(self, pop_size=50, generations=100, mutate_rate=0.1, breed_rate=0.75, genome_length=100,
                  max_turns=3600, max_time=0, start_state=None, verbose_interval=10, **kwargs):
@@ -38,19 +39,25 @@ class ClickerGA(GeneticAlgorithm):
         # Buying buildinds/upgrades allowed
         # 0: buy building
         # 1: buy upgrade
+        # 2: sell building
         action = self.rand_action.next()
         if action == 0:
             bInd = self.rand_building.next()
             return action, bInd
 
         if action == 1:
-            bInd = self.rand_building.next()
+            bInd = self.rand_upgrade.next()
             if bInd == 0:
-                # Cursor upgrades scale differently, must be implemented later
-                upInd = random.randrange(2)
+                upInd = self.rand_cursor_upgrade.next()
+            elif bInd == 15:
+                upInd = self.rand_grandma_upgrade.next()
             else:
-                upInd = self.rand_upgrade.next()
+                upInd = self.rand_building_upgrade.next()
             return action, bInd, upInd
+
+        if action == 2:
+            bInd = self.rand_building.next()
+            return action, bInd
 
     def gen_genome(self):
         return [self.gen_bit() for _ in range(self.genome_length)]
@@ -63,7 +70,7 @@ class ClickerGA(GeneticAlgorithm):
         }
 
         game_state, order_ind = simulate(self.game_state, self.max_turns, genome)
-        r["score"] = game_state.get_total_money_earned()
+        r["score"] = game_state.tot_money_earned
         # r["score"] = game_state.money_per_turn
 
         return r
@@ -71,11 +78,14 @@ class ClickerGA(GeneticAlgorithm):
 
 def simulate(game_state, max_turns, actions, graph=False):
     # Simulates game until out of buy instructions or given turns exceeded
+
     def calc_req_turns(action_ind):
         if actions[action_ind][0] == 0:
             return game_state.turns_to_buy_building(actions[action_ind][1])
         elif actions[action_ind][0] == 1:
             return game_state.turns_to_buy_upgrade(actions[action_ind][1], actions[action_ind][2])
+        elif actions[action_ind][0] == 2:
+            return game_state.turns_to_sell_building(actions[action_ind][1])
         else:
             return 0
 
@@ -84,6 +94,8 @@ def simulate(game_state, max_turns, actions, graph=False):
             game_state.buy_building(actions[action_ind][1])
         elif actions[action_ind][0] == 1:
             game_state.buy_upgrade(actions[action_ind][1], actions[action_ind][2])
+        elif actions[action_ind][0] == 2:
+            game_state.sell_building(actions[action_ind][1])
 
     game_state = game_state.copy()
 

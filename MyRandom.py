@@ -2,8 +2,9 @@ import numpy
 
 
 class Randrange:
-    def __init__(self, high):
+    def __init__(self, high, low=0):
         self.high = high
+        self.low = low
 
         self.gen_rands()
 
@@ -15,7 +16,7 @@ class Randrange:
         return self.r[self.r_ind - 1]
 
     def gen_rands(self):
-        self.r = numpy.random.randint(self.high, size=10 ** 6)
+        self.r = numpy.random.randint(self.low, self.high, size=10 ** 6)
 
         self.r_ind = 0
         self.new_ind = 10 ** 6
