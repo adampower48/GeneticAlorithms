@@ -58,6 +58,7 @@ class Game:
         (26 * 10 ** 16, 13 * 10 ** 17) + tuple((13 * 10 ** 17) * 100 ** n for n in range(7)),
     )
     upgrade_cost += (tuple(u[1] for u in upgrade_cost[2::]),)  # Grandma upgrades: ind 15
+    # todo: Cookie upgrades. NOTE - Multiplicative, not additive
 
     upgrade_multipliers = ((2,) * 3,) + ((2,) * 9,) * 14
     cursor_additions = (0.1,) + tuple(0.5 * 10 ** n for n in range(8))
@@ -288,11 +289,13 @@ class Game:
         """
         g = Game(money=self.money, tot_money_earned=self.tot_money_earned, building_count=self.building_count,
                  upgrades_owned=self.upgrades_owned, turns_taken=self.turns_taken, copy=True)
+
         g.building_cost_current = self.building_cost_current[:]
         g.tot_upgrade_muls = self.tot_upgrade_muls[:]
         g.buildings_mpt = self.buildings_mpt[:]
+        g.tot_grandma_upg_effects = self.tot_grandma_upg_effects[:]
+
         g.money_per_turn = self.money_per_turn
-        g.tot_grandma_upg_effects = self.tot_grandma_upg_effects
         g.tot_cursor_add = self.tot_cursor_add
         g.non_cursors_owned = self.non_cursors_owned
 
