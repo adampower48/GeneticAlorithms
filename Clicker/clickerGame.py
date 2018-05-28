@@ -59,6 +59,16 @@ class Game:
     )
     upgrade_cost += (tuple(u[1] for u in upgrade_cost[2::]),)  # Grandma upgrades: ind 15
     # todo: Cookie upgrades. NOTE - Multiplicative, not additive
+    # List of completed: http://prntscr.com/jn087m
+    #
+    # tuple(10 ** n - 1 for n in range(6, 9))  # 1%
+    # tuple(5 * 10 ** n - 5 for n in range(6, 8))  # 1%
+    # tuple(10 ** n - 1 for n in range(9, 11))  # 2%
+    # tuple(5 * 10 ** n - 5 for n in range(8, 11))  # 2%
+    # (10 ** 11 - 1,) * 2  # 4%
+    # tuple(5 * 10 ** n - 5 for n in range(11, 14))  # 2%
+    # tuple(10 ** n - 1 for n in range(12, 14))  # 2%
+    # ---------------
 
     upgrade_multipliers = ((2,) * 3,) + ((2,) * 9,) * 14
     cursor_additions = (0.1,) + tuple(0.5 * 10 ** n for n in range(8))
@@ -160,7 +170,7 @@ class Game:
         :return: int - building sell price
         """
         return math.ceil(self.building_cost_base[bInd] * self.building_scaling ** (
-            self.building_count[bInd] - 1) * self.building_sell_mod)
+                self.building_count[bInd] - 1) * self.building_sell_mod)
 
     def get_upgrade_cost(self, bInd, upInd):
         """

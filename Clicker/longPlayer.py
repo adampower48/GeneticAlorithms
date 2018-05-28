@@ -1,5 +1,6 @@
-import clickerGA as clickerGA
 from clickerGame import Game
+
+import Clicker.clickerGA as clickerGA
 
 MAX_GAME_TURNS = 7200
 SUBSEC_TURNS = 1200

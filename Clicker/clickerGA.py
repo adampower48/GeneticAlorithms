@@ -16,7 +16,7 @@ class ClickerGA(GeneticAlgorithm):
     rand_cursor_upgrade = MyRandom.Randrange(len(Game.upgrade_cost[0]))
     rand_grandma_upgrade = MyRandom.Randrange(len(Game.building_cost_base) - 2)
 
-    def __init__(self, pop_size=50, generations=100, mutate_rate=0.1, breed_rate=0.75, genome_length=100,
+    def __init__(self, pop_size=50, generations=100, mutate_rate=0.05, breed_rate=0.95, genome_length=100,
                  max_turns=3600, max_time=0, start_state=None, verbose_interval=10, **kwargs):
         super().__init__(pop_size=pop_size, generations=generations, mutate_rate=mutate_rate, breed_rate=breed_rate,
                          max_time=max_time, verbose_interval=verbose_interval, **kwargs)
