@@ -3,6 +3,19 @@ import matplotlib
 matplotlib.use("Qt5Agg")
 import matplotlib.pyplot as plt
 
+
+def plot_series(plots, max_x):
+    hsv = plt.get_cmap('hsv')
+
+    for i in range(len(plots)):
+        points = plots[i] + [(max_x, plots[i][-1][1])]
+        print(points)
+        colour = hsv(float(i) / (len(plots) - 1))
+        print(colour)
+        plt.plot(*list(zip(*points)), colour, drawstyle="steps-post", label=str(i))
+        print("points" + str(i))
+
+
 # 7200 Turns, pointsX -> X seconds of simulation time
 max_x = 7200
 points10 = [(0, 0.1), (1000, 1.1), (1105, 2.1), (1629, 10.1), (1755, 18.1), (1835, 26.1), (2295, 73.1), (2484, 120.1),
@@ -1759,13 +1772,15 @@ plt.ylabel("Fitness / Money Per Turn")
 # plt.plot(*list(zip(*pointsB045)), "b", drawstyle="steps-post", label="B045")
 # plt.plot(*list(zip(*pointsB055)), "m", drawstyle="steps-post", label="B055")
 # plt.plot(*list(zip(*pointsB065)), "y", drawstyle="steps-post", label="B065")
-plt.plot(*list(zip(*pointsB075)), "c", drawstyle="steps-post", label="B075")
-plt.plot(*list(zip(*pointsB085)), "k", drawstyle="steps-post", label="B085")
-plt.plot(*list(zip(*pointsB09)), "r", drawstyle="steps-post", label="B09")
-plt.plot(*list(zip(*pointsB095)), "g", drawstyle="steps-post", label="B095")
-plt.plot(*list(zip(*pointsB099)), "b", drawstyle="steps-post", label="B099")
-plt.plot(*list(zip(*pointsB1)), "m", drawstyle="steps-post", label="B1")
-plt.plot(*list(zip(*pointsMB600)), "c", drawstyle="steps-post", label="MB600")
+# plt.plot(*list(zip(*pointsB075)), "c", drawstyle="steps-post", label="B075")
+# plt.plot(*list(zip(*pointsB085)), "k", drawstyle="steps-post", label="B085")
+# plt.plot(*list(zip(*pointsB09)), "r", drawstyle="steps-post", label="B09")
+# plt.plot(*list(zip(*pointsB095)), "g", drawstyle="steps-post", label="B095")
+# plt.plot(*list(zip(*pointsB099)), "b", drawstyle="steps-post", label="B099")
+# plt.plot(*list(zip(*pointsB1)), "m", drawstyle="steps-post", label="B1")
+# plt.plot(*list(zip(*pointsMB600)), "c", drawstyle="steps-post", label="MB600")
+
+plot_series([pointsB075, pointsB085, pointsB09, pointsB095, pointsB099, pointsB1, pointsMB600], 7200)
 legend = plt.legend(loc='upper left', shadow=True, fontsize='medium', title="Mutation Rate")
 
 # Variation in number of generations
